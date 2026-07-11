@@ -320,7 +320,6 @@ final class CleaningModeController {
         guard windows.isEmpty, !waitingForEscapeRelease else { return }
         NSLog("MacWipePlus start requested: %@", duration.displayName)
         remainingSeconds = duration.seconds
-        presentWindows()
         if AXIsProcessTrusted() {
             inputBlocker = EventTapInputBlocker(
                 onEscape: { [weak self] event in self?.handle(event: event) },
@@ -334,8 +333,11 @@ final class CleaningModeController {
                 inputBlocker = nil
             }
         }
+        // Install global capture before presenting the overlay so startup input
+        // cannot leak into the app that was focused before cleaning mode.
         installLocalInputMonitor()
         installGlobalEmergencyMonitor()
+        presentWindows()
         startTimer(for: duration)
     }
 
@@ -512,14 +514,20 @@ final class CleaningView: NSView {
         if event.keyCode == 53 { onEscape(.up) }
     }
 
-    override func flagsChanged(with event: NSEvent) {}
-    override func mouseDown(with event: NSEvent) {}
-    override func mouseUp(with event: NSEvent) {}
-    override func rightMouseDown(with event: NSEvent) {}
-    override func rightMouseUp(with event: NSEvent) {}
-    override func otherMouseDown(with event: NSEvent) {}
-    override func otherMouseUp(with event: NSEvent) {}
-    override func scrollWheel(with event: NSEvent) {}
+    override func flagsChanged(with event: NSEvent) { retainFocus() }
+    override func mouseDown(with event: NSEvent) { retainFocus() }
+    override func mouseUp(with event: NSEvent) { retainFocus() }
+    override func rightMouseDown(with event: NSEvent) { retainFocus() }
+    override func rightMouseUp(with event: NSEvent) { retainFocus() }
+    override func otherMouseDown(with event: NSEvent) { retainFocus() }
+    override func otherMouseUp(with event: NSEvent) { retainFocus() }
+    override func scrollWheel(with event: NSEvent) { retainFocus() }
+
+    private func retainFocus() {
+        guard let window else { return }
+        if !window.isKeyWindow { window.makeKeyAndOrderFront(nil) }
+        if window.firstResponder !== self { window.makeFirstResponder(self) }
+    }
 
     override func layout() {
         super.layout()
