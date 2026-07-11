@@ -499,7 +499,7 @@ final class CleaningView: NSView {
 
         let progress = min(1, max(0, elapsed / Self.escapeHoldDuration))
         let secondsLeft = max(1, Int(ceil(Self.escapeHoldDuration - elapsed)))
-        let chipRect = NSRect(x: bounds.maxX - 224, y: 28, width: 196, height: 56)
+        let chipRect = NSRect(x: bounds.midX - 98, y: 72, width: 196, height: 56)
         let chipPath = NSBezierPath(roundedRect: chipRect, xRadius: 16, yRadius: 16)
         NSColor(white: 0.09, alpha: 0.96).setFill()
         chipPath.fill()
@@ -539,7 +539,10 @@ final class CleaningView: NSView {
     private func updateText() {
         let progress = getEscapeProgress()
         if progress > 0 {
-            label.stringValue = ""
+            let secondsLeft = max(1, Int(ceil(3 - progress)))
+            label.stringValue = AppCopy.isTraditionalChinese
+                ? "請繼續按住 Esc · \(secondsLeft) 秒後退出"
+                : "Keep holding Esc · exits in \(secondsLeft)s"
             return
         }
         if let remaining = getRemaining() {
