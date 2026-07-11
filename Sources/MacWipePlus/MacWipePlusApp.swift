@@ -286,6 +286,7 @@ final class CleaningModeController {
     private var inputBlocker: EventTapInputBlocker?
     private var escapeProgressTimer: Timer?
     private var escapeState = EscapeHoldStateMachine()
+    private var waitingForEscapeRelease = false
     private var localInputMonitor: Any?
     private var globalEmergencyMonitor: Any?
 
@@ -294,7 +295,7 @@ final class CleaningModeController {
     }
 
     func start(using duration: CleaningDuration) {
-        guard windows.isEmpty else { return }
+        guard windows.isEmpty, !waitingForEscapeRelease else { return }
         NSLog("MacWipePlus start requested: %@", duration.displayName)
         remainingSeconds = duration.seconds
         presentWindows()
@@ -322,12 +323,20 @@ final class CleaningModeController {
         escapeProgressTimer?.invalidate()
         escapeProgressTimer = nil
         _ = escapeState.keyUp()
-        if let localInputMonitor { NSEvent.removeMonitor(localInputMonitor) }
-        localInputMonitor = nil
-        if let globalEmergencyMonitor { NSEvent.removeMonitor(globalEmergencyMonitor) }
-        globalEmergencyMonitor = nil
-        inputBlocker?.stop()
-        inputBlocker = nil
+        let preserveEscapeCapture = reason == .escapeHeld
+        if !preserveEscapeCapture {
+            if let localInputMonitor { NSEvent.removeMonitor(localInputMonitor) }
+            localInputMonitor = nil
+            if let globalEmergencyMonitor { NSEvent.removeMonitor(globalEmergencyMonitor) }
+            globalEmergencyMonitor = nil
+            inputBlocker?.stop()
+            inputBlocker = nil
+            waitingForEscapeRelease = false
+        } else {
+            // Keep swallowing key-repeat until the physical Esc key is released;
+            // otherwise the next app receives repeated Esc presses and may beep.
+            waitingForEscapeRelease = true
+        }
         windows.forEach { $0.orderOut(nil) }
         windows.removeAll()
         remainingSeconds = nil
@@ -396,6 +405,15 @@ final class CleaningModeController {
             escapeProgressTimer?.invalidate()
             escapeProgressTimer = nil
             refreshWindows()
+            if waitingForEscapeRelease {
+                waitingForEscapeRelease = false
+                inputBlocker?.stop()
+                inputBlocker = nil
+                if let localInputMonitor { NSEvent.removeMonitor(localInputMonitor) }
+                localInputMonitor = nil
+                if let globalEmergencyMonitor { NSEvent.removeMonitor(globalEmergencyMonitor) }
+                globalEmergencyMonitor = nil
+            }
         case .emergency:
             _ = escapeState.emergencyExit()
             stop(reason: .emergency)
