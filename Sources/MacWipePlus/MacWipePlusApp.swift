@@ -604,6 +604,7 @@ final class CleaningView: NSView {
 enum EscapeEvent { case down, up, emergency }
 
 final class EventTapInputBlocker {
+    private static let systemDefinedEventType = CGEventType(rawValue: 14)!
     private var tap: CFMachPort?
     private let onEscape: (EscapeEvent) -> Void
     private let onEmergency: () -> Void
@@ -617,7 +618,7 @@ final class EventTapInputBlocker {
     }
 
     func start() throws {
-        let eventTypes: [CGEventType] = [.keyDown, .keyUp, .flagsChanged, .leftMouseDown, .leftMouseUp, .scrollWheel, .otherMouseDown, .otherMouseUp]
+        let eventTypes: [CGEventType] = [.keyDown, .keyUp, .flagsChanged, Self.systemDefinedEventType, .leftMouseDown, .leftMouseUp, .scrollWheel, .otherMouseDown, .otherMouseUp]
         let mask = eventTypes.reduce(CGEventMask(0)) { partialResult, eventType in
             partialResult | (CGEventMask(1) << CGEventMask(eventType.rawValue))
         }
@@ -640,6 +641,11 @@ final class EventTapInputBlocker {
     fileprivate func handle(_ event: CGEvent, type: CGEventType) -> Unmanaged<CGEvent>? {
         if type == .tapDisabledByTimeout, let tap {
             CGEvent.tapEnable(tap: tap, enable: true)
+            return nil
+        }
+        if type == Self.systemDefinedEventType {
+            // Brightness, volume, media, and Fn-row hardware keys arrive here;
+            // dropping them prevents system-level actions during cleaning mode.
             return nil
         }
         if type == .flagsChanged {
