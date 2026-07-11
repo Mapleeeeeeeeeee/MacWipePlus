@@ -433,6 +433,7 @@ final class CleaningModeController {
 }
 
 final class CleaningView: NSView {
+    private static let escapeHoldDuration: TimeInterval = 3
     private let getRemaining: () -> Int?
     private let getEscapeProgress: () -> TimeInterval
     private let onEscape: (EscapeEvent) -> Void
@@ -488,15 +489,57 @@ final class CleaningView: NSView {
 
     func refresh() {
         updateText()
+        needsDisplay = true
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
+        let elapsed = getEscapeProgress()
+        guard elapsed > 0 else { return }
+
+        let progress = min(1, max(0, elapsed / Self.escapeHoldDuration))
+        let secondsLeft = max(1, Int(ceil(Self.escapeHoldDuration - elapsed)))
+        let chipRect = NSRect(x: bounds.maxX - 224, y: 28, width: 196, height: 56)
+        let chipPath = NSBezierPath(roundedRect: chipRect, xRadius: 16, yRadius: 16)
+        NSColor(white: 0.09, alpha: 0.96).setFill()
+        chipPath.fill()
+        NSColor.white.withAlphaComponent(0.18).setStroke()
+        chipPath.lineWidth = 1
+        chipPath.stroke()
+
+        guard let context = NSGraphicsContext.current?.cgContext else { return }
+        let ringCenter = CGPoint(x: chipRect.minX + 30, y: chipRect.midY)
+        context.saveGState()
+        context.setLineCap(.round)
+        context.setLineWidth(3)
+        context.setStrokeColor(NSColor.white.withAlphaComponent(0.14).cgColor)
+        context.addArc(center: ringCenter, radius: 17, startAngle: .pi / 2, endAngle: .pi / 2 - (.pi * 2), clockwise: true)
+        context.strokePath()
+        context.setStrokeColor(NSColor.controlAccentColor.cgColor)
+        context.addArc(center: ringCenter, radius: 17, startAngle: .pi / 2, endAngle: .pi / 2 - (.pi * 2 * progress), clockwise: true)
+        context.strokePath()
+        context.restoreGState()
+
+        let title = AppCopy.isTraditionalChinese ? "長按 Esc" : "Hold Esc"
+        let detail = AppCopy.isTraditionalChinese ? "\(secondsLeft) 秒" : "\(secondsLeft) seconds"
+        let titleAttributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: 13, weight: .semibold),
+            .foregroundColor: NSColor.white.withAlphaComponent(0.9)
+        ]
+        let detailAttributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: 11, weight: .regular),
+            .foregroundColor: NSColor.white.withAlphaComponent(0.5)
+        ]
+        NSAttributedString(string: title, attributes: titleAttributes)
+            .draw(at: CGPoint(x: chipRect.minX + 57, y: chipRect.midY + 1))
+        NSAttributedString(string: detail, attributes: detailAttributes)
+            .draw(at: CGPoint(x: chipRect.minX + 57, y: chipRect.midY - 17))
     }
 
     private func updateText() {
         let progress = getEscapeProgress()
         if progress > 0 {
-            let secondsLeft = max(1, Int(ceil(3 - progress)))
-            label.stringValue = AppCopy.isTraditionalChinese
-                ? "請繼續按住 Esc · \(secondsLeft) 秒後退出"
-                : "Keep holding Esc · exits in \(secondsLeft)s"
+            label.stringValue = ""
             return
         }
         if let remaining = getRemaining() {
