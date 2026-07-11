@@ -5,6 +5,7 @@
 	<key>CFBundleDisplayName</key><string>MacWipePlus</string>
 	<key>CFBundleIdentifier</key><string>com.local.macwipeplus</string>
 	<key>CFBundleName</key><string>MacWipePlus</string>
+	<key>CFBundleIconFile</key><string>MacWipePlus.icns</string>
 	<key>CFBundlePackageType</key><string>APPL</string>
 	<key>LSUIElement</key><true/>
 	<key>NSAppleEventsUsageDescription</key><string>MacWipePlus does not record or transmit input.</string>

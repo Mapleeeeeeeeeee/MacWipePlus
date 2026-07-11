@@ -132,11 +132,14 @@ final class MacWipePlusApp: NSObject, NSApplicationDelegate {
         alert.informativeText = "\(AppCopy.shortcutHint)\n\n\(preferences.globalHotKey.displayName)"
         alert.addButton(withTitle: AppCopy.cancel)
         var captured: GlobalHotKey?
+        let previous = preferences.globalHotKey
+        let modifierKeyCodes: Set<UInt16> = [54, 55, 56, 58, 59, 60, 61, 62]
         let monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             if event.keyCode == 53 {
                 NSApp.abortModal()
                 return nil
             }
+            guard !modifierKeyCodes.contains(event.keyCode) else { return nil }
             let modifiers = event.modifierFlags.intersection([.control, .option, .command, .shift])
             guard !modifiers.isEmpty else { return nil }
             captured = GlobalHotKey(keyCode: event.keyCode, modifiers: modifiers)
@@ -147,8 +150,12 @@ final class MacWipePlusApp: NSObject, NSApplicationDelegate {
         if let monitor { NSEvent.removeMonitor(monitor) }
         if let captured {
             preferences.globalHotKey = captured
-            installGlobalHotKey()
-            statusItem.menu = makeMenu()
+            if installGlobalHotKey() {
+                statusItem.menu = makeMenu()
+            } else {
+                preferences.globalHotKey = previous
+                _ = installGlobalHotKey()
+            }
         }
     }
 
@@ -158,12 +165,15 @@ final class MacWipePlusApp: NSObject, NSApplicationDelegate {
         NSApp.terminate(nil)
     }
 
-    private func installGlobalHotKey() {
+    @discardableResult
+    private func installGlobalHotKey() -> Bool {
         let hotKey = preferences.globalHotKey
         do {
             try globalHotKeyService.register(keyCode: UInt32(hotKey.keyCode), modifiers: hotKey.carbonModifiers)
+            return true
         } catch {
             NSLog("MacWipePlus could not register global shortcut %@: %@", hotKey.displayName, String(describing: error))
+            return false
         }
     }
 }
@@ -245,7 +255,12 @@ struct GlobalHotKey: Equatable {
             (modifiers.contains(.shift), "Shift"),
             (modifiers.contains(.command), "Command")
         ].compactMap { $0.0 ? $0.1 : nil }.joined(separator: "-")
-        let key = keyCode == 46 ? "M" : "Key \(keyCode)"
+        let keyNames: [UInt16: String] = [
+            0: "A", 1: "S", 2: "D", 3: "F", 4: "H", 5: "G", 6: "Z", 7: "X", 8: "C", 9: "V",
+            11: "B", 12: "Q", 13: "W", 14: "E", 15: "R", 16: "Y", 17: "T", 31: "O", 32: "U",
+            34: "I", 35: "P", 37: "L", 38: "J", 40: "K", 45: "N", 46: "M", 49: "Space", 36: "Return", 48: "Tab"
+        ]
+        let key = keyNames[keyCode] ?? "Key \(keyCode)"
         return "\(modifierText)-\(key)"
     }
 }
