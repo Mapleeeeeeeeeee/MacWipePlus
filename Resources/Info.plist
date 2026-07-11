@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key><string>MacWipePlus</string>
+	<key>CFBundleIdentifier</key><string>com.local.macwipeplus</string>
+	<key>CFBundleName</key><string>MacWipePlus</string>
+	<key>CFBundlePackageType</key><string>APPL</string>
+	<key>LSUIElement</key><true/>
+	<key>NSAppleEventsUsageDescription</key><string>MacWipePlus does not record or transmit input.</string>
+	<key>NSAccessibilityUsageDescription</key><string>MacWipePlus needs Accessibility access to temporarily block input while cleaning your Mac.</string>
+	<key>NSInputMonitoringUsageDescription</key><string>MacWipePlus uses input monitoring only while cleaning mode is active, so accidental input cannot reach other apps.</string>
+	<key>CFBundleShortVersionString</key><string>0.1.0</string>
+	<key>CFBundleVersion</key><string>1</string>
+</dict>
+</plist>
