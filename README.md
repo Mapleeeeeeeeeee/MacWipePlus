@@ -27,5 +27,5 @@ The app does not record, store, or transmit keyboard, pointer, or screen data.
 - Default global shortcut: `Control-Option-Command-M`.
 - Custom shortcut: choose `Set Shortcut…` from the menu bar item.
 - Exit: hold `Esc` for 3 seconds; the overlay shows the remaining hold time.
-- Emergency exit: press `Control-Option-Command-Esc`. `Option-Command-Esc` remains the macOS Force Quit shortcut and is not reliable for app-level interception.
+- Emergency exit: press `Control-Option-Esc`. `Control-Option-Command-Esc` is also supported; `Option-Command-Esc` remains the macOS Force Quit shortcut and is not reliable for app-level interception.
 - Custom duration range: 10–3,600 seconds.

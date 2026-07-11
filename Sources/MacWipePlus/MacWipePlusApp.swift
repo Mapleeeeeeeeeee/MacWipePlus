@@ -430,9 +430,11 @@ final class CleaningModeController {
     private func installLocalInputMonitor() {
         localInputMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp]) { [weak self] event in
             guard let self else { return event }
-            if event.keyCode == 53 && event.modifierFlags.contains([.command, .option]) {
+            let hasEmergencyModifiers = event.modifierFlags.contains([.command, .option])
+                || event.modifierFlags.contains([.control, .option])
+            if event.keyCode == 53 && hasEmergencyModifiers {
                 self.handle(event: .emergency)
-                return event
+                return nil
             }
             if event.keyCode == 53 {
                 self.handle(event: event.type == .keyDown ? .down : .up)
@@ -443,8 +445,10 @@ final class CleaningModeController {
 
     private func installGlobalEmergencyMonitor() {
         globalEmergencyMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            guard event.keyCode == 53,
-                  event.modifierFlags.contains([.command, .option]) else { return }
+            guard event.keyCode == 53 else { return }
+            let hasEmergencyModifiers = event.modifierFlags.contains([.command, .option])
+                || event.modifierFlags.contains([.control, .option])
+            guard hasEmergencyModifiers else { return }
             self?.stop(reason: .emergency)
         }
     }
@@ -629,9 +633,10 @@ final class EventTapInputBlocker {
             let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
             let hasReservedEmergencyModifiers = event.flags.contains([.maskCommand, .maskAlternate]) || (commandDown && optionDown)
             let hasFallbackEmergencyModifiers = event.flags.contains([.maskCommand, .maskAlternate, .maskControl]) || (commandDown && optionDown && controlDown)
-            if keyCode == 53 && (hasReservedEmergencyModifiers || hasFallbackEmergencyModifiers) {
+            let hasSimpleEmergencyModifiers = event.flags.contains([.maskControl, .maskAlternate]) || (controlDown && optionDown)
+            if keyCode == 53 && (hasReservedEmergencyModifiers || hasFallbackEmergencyModifiers || hasSimpleEmergencyModifiers) {
                 DispatchQueue.main.async { [onEmergency] in onEmergency() }
-                return Unmanaged.passUnretained(event)
+                return nil
             }
             if keyCode == 53 {
                 let escapeEvent: EscapeEvent = event.type == .keyDown ? .down : .up

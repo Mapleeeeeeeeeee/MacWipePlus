@@ -197,7 +197,7 @@ Timer 完成、權限失效、event tap 建立失敗、tap 無法重新啟用或
 | `EventTapInputBlocker` | Esc keyDown/keyUp 轉交、其他鍵盤/滑鼠/滾輪/gesture/pointing 事件回傳 nil、不可攔截硬體事件不作保證、stop 後不再攔截、tap failure 轉成錯誤 |
 | `CleaningModeService` | 各種退出原因都只執行一次完整 cleanup |
 | `GlobalHotKeyService` | 預設快捷鍵為 Control-Option-Command-M、自訂快捷鍵可註冊、衝突時拒絕新值並保留舊值 |
-| Emergency shortcut | Control-Option-Command-Esc 直接退出清潔模式；Option-Command-Esc 保留給 macOS Force Quit，不依賴 App 攔截 |
+| Emergency shortcut | Control-Option-Esc 直接退出清潔模式，也接受 Control-Option-Command-Esc；Option-Command-Esc 保留給 macOS Force Quit |
 
 ### Integration Test 邊界
 

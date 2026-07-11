@@ -4,6 +4,7 @@ final class GlobalHotKeyService {
     private var hotKey: EventHotKeyRef?
     private var emergencyHotKey: EventHotKeyRef?
     private var fallbackEmergencyHotKey: EventHotKeyRef?
+    private var simpleEmergencyHotKey: EventHotKeyRef?
     private var handler: EventHandlerRef?
     private let onPress: () -> Void
     private let onEmergency: () -> Void
@@ -27,7 +28,7 @@ final class GlobalHotKeyService {
                 let size = MemoryLayout<EventHotKeyID>.size
                 let status = GetEventParameter(event, EventParamName(kEventParamDirectObject), EventParamType(typeEventHotKeyID), nil, size, nil, &hotKeyID)
                 guard status == noErr, hotKeyID.signature == service.signature else { return noErr }
-                if hotKeyID.id == 2 || hotKeyID.id == 3 {
+                if hotKeyID.id == 2 || hotKeyID.id == 3 || hotKeyID.id == 4 {
                     service.onEmergency()
                 } else {
                     service.onPress()
@@ -61,6 +62,12 @@ final class GlobalHotKeyService {
         if fallbackEmergencyStatus != noErr {
             fallbackEmergencyHotKey = nil
         }
+        let simpleEmergencyIdentifier = EventHotKeyID(signature: signature, id: 4)
+        let simpleEmergencyModifiers = UInt32(controlKey | optionKey)
+        let simpleEmergencyStatus = RegisterEventHotKey(53, simpleEmergencyModifiers, simpleEmergencyIdentifier, GetApplicationEventTarget(), 0, &simpleEmergencyHotKey)
+        if simpleEmergencyStatus != noErr {
+            simpleEmergencyHotKey = nil
+        }
     }
 
     func unregister() {
@@ -70,6 +77,8 @@ final class GlobalHotKeyService {
         emergencyHotKey = nil
         if let fallbackEmergencyHotKey { UnregisterEventHotKey(fallbackEmergencyHotKey) }
         fallbackEmergencyHotKey = nil
+        if let simpleEmergencyHotKey { UnregisterEventHotKey(simpleEmergencyHotKey) }
+        simpleEmergencyHotKey = nil
         if let handler { RemoveEventHandler(handler) }
         handler = nil
     }

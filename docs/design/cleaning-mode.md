@@ -129,7 +129,7 @@
   Then 清潔畫面底部顯示 3、2、1 秒的退出倒數
 
 - Given 清潔模式正在執行
-  When 使用者按下 `Control-Option-Command-Esc`
+  When 使用者按下 `Control-Option-Esc`
   Then 清潔模式立即退出，且 macOS 的強制結束快捷鍵仍可使用
 
 - Given 使用者選擇 2 分鐘
