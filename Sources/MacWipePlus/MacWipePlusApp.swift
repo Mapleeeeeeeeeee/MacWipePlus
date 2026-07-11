@@ -178,6 +178,7 @@ enum AppCopy {
     static var invalidDuration: String { isTraditionalChinese ? "無效的清潔時間" : "Invalid duration" }
     static var shortcutTitle: String { isTraditionalChinese ? "設定快捷鍵" : "Set shortcut" }
     static var shortcutHint: String { isTraditionalChinese ? "請按下含 Control、Option、Command 或 Shift 的快捷鍵；按 Esc 取消。" : "Press a shortcut containing Control, Option, Command, or Shift. Press Esc to cancel." }
+    static var emergencyShortcutHint: String { isTraditionalChinese ? "緊急退出：⌃⌥Esc" : "Emergency: ⌃⌥Esc" }
     static var accessibilityTitle: String { isTraditionalChinese ? "需要輔助使用權限" : "Accessibility permission required" }
     static var accessibilityHint: String { isTraditionalChinese ? "請到系統設定 → 隱私權與安全性 → 輔助使用，允許 MacWipePlus 後再試一次。" : "Allow MacWipePlus in System Settings → Privacy & Security → Accessibility, then try again." }
     static var openSettings: String { isTraditionalChinese ? "開啟系統設定" : "Open System Settings" }
@@ -563,18 +564,18 @@ final class CleaningView: NSView {
         if progress > 0 {
             let secondsLeft = max(1, Int(ceil(3 - progress)))
             label.stringValue = AppCopy.isTraditionalChinese
-                ? "請繼續按住 Esc · \(secondsLeft) 秒後退出"
-                : "Keep holding Esc · exits in \(secondsLeft)s"
+                ? "請繼續按住 Esc · \(secondsLeft) 秒後退出 · \(AppCopy.emergencyShortcutHint)"
+                : "Keep holding Esc · exits in \(secondsLeft)s · \(AppCopy.emergencyShortcutHint)"
             return
         }
         if let remaining = getRemaining() {
             label.stringValue = AppCopy.isTraditionalChinese
-                ? "清潔模式 · 剩餘 \(remaining) 秒 · 長按 Esc 3 秒退出"
-                : "Cleaning mode · \(remaining)s remaining · Hold Esc for 3 seconds to exit"
+                ? "清潔模式 · 剩餘 \(remaining) 秒 · 長按 Esc 3 秒退出 · \(AppCopy.emergencyShortcutHint)"
+                : "Cleaning mode · \(remaining)s remaining · Hold Esc for 3 seconds to exit · \(AppCopy.emergencyShortcutHint)"
         } else {
             label.stringValue = AppCopy.isTraditionalChinese
-                ? "清潔模式 · 不自動退出 · 長按 Esc 3 秒退出"
-                : "Cleaning mode · No automatic exit · Hold Esc for 3 seconds to exit"
+                ? "清潔模式 · 不自動退出 · 長按 Esc 3 秒退出 · \(AppCopy.emergencyShortcutHint)"
+                : "Cleaning mode · No automatic exit · Hold Esc for 3 seconds to exit · \(AppCopy.emergencyShortcutHint)"
         }
     }
 }
