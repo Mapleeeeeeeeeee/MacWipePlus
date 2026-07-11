@@ -54,38 +54,44 @@ final class MacWipePlusApp: NSObject, NSApplicationDelegate {
 
     private func makeMenu() -> NSMenu {
         let menu = NSMenu()
-        let start = NSMenuItem(title: AppCopy.startCleaning, action: #selector(startCleaning), keyEquivalent: "")
+        let start = makeMenuItem(title: AppCopy.startCleaning, action: #selector(startCleaning), imageName: "play.circle")
         start.target = self
         menu.addItem(start)
 
         let durationMenu = NSMenu(title: AppCopy.duration)
         for duration in CleaningDuration.presets {
-            let item = NSMenuItem(title: duration.displayName, action: #selector(selectDuration(_:)), keyEquivalent: "")
+            let item = makeMenuItem(title: duration.displayName, action: #selector(selectDuration(_:)), imageName: "clock")
             item.target = self
             item.representedObject = duration
             item.state = preferences.lastDuration == duration ? .on : .off
             durationMenu.addItem(item)
         }
-        let never = NSMenuItem(title: CleaningDuration.never.displayName, action: #selector(selectDuration(_:)), keyEquivalent: "")
+        let never = makeMenuItem(title: CleaningDuration.never.displayName, action: #selector(selectDuration(_:)), imageName: "infinity")
         never.target = self
         never.representedObject = CleaningDuration.never
         never.state = preferences.lastDuration == .never ? .on : .off
         durationMenu.addItem(never)
-        let custom = NSMenuItem(title: AppCopy.customSeconds, action: #selector(selectCustomDuration), keyEquivalent: "")
+        let custom = makeMenuItem(title: AppCopy.customSeconds, action: #selector(selectCustomDuration), imageName: "slider.horizontal.3")
         custom.target = self
         durationMenu.addItem(custom)
-        let durationItem = NSMenuItem(title: "Duration", action: nil, keyEquivalent: "")
+        let durationItem = makeMenuItem(title: AppCopy.duration, action: nil, imageName: "timer")
         durationItem.submenu = durationMenu
         menu.addItem(durationItem)
-        let shortcut = NSMenuItem(title: AppCopy.setShortcut, action: #selector(selectShortcut), keyEquivalent: "")
+        let shortcut = makeMenuItem(title: AppCopy.setShortcut, action: #selector(selectShortcut), imageName: "keyboard")
         shortcut.target = self
         menu.addItem(shortcut)
         menu.addItem(.separator())
 
-        let quit = NSMenuItem(title: AppCopy.quit, action: #selector(quit), keyEquivalent: "q")
+        let quit = makeMenuItem(title: AppCopy.quit, action: #selector(quit), keyEquivalent: "q", imageName: "power")
         quit.target = self
         menu.addItem(quit)
         return menu
+    }
+
+    private func makeMenuItem(title: String, action: Selector?, keyEquivalent: String = "", imageName: String) -> NSMenuItem {
+        let item = NSMenuItem(title: title, action: action, keyEquivalent: keyEquivalent)
+        item.image = NSImage(systemSymbolName: imageName, accessibilityDescription: title)
+        return item
     }
 
     @objc private func startCleaning() {
