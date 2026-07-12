@@ -215,7 +215,7 @@ enum AppCopy {
     static func languageOption(_ language: AppLanguage) -> String {
         switch language {
         case .english: return "English"
-        case .traditionalChinese: return "Traditional Chinese"
+        case .traditionalChinese: return "繁體中文"
         }
     }
 
