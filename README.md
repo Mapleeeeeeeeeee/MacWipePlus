@@ -25,11 +25,13 @@ Free, local macOS cleaning mode for macOS 13+.
 - Hold `Esc` for 3 seconds to exit.
 - Emergency exit: `Control-Option-Esc`.
 - Custom duration range: 10–3,600 seconds.
+- App language defaults to English; choose Traditional Chinese from the Language menu.
 - No keyboard, pointer, or screen data is recorded, stored, or transmitted.
 
 ## Controls
 
 - Menu bar: choose 15 seconds, 30 seconds, 1/2/5/10 minutes, custom seconds, or never auto-exit.
+- Language: choose English or Traditional Chinese; the selection is saved.
 - Default global shortcut: `Control-Option-Command-M`.
 - Custom shortcut: choose **Set Shortcut…** from the menu bar item.
 - Exit: hold `Esc` for 3 seconds; the overlay shows the remaining hold time.
