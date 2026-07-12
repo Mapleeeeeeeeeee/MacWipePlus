@@ -121,6 +121,7 @@ final class MacWipePlusApp: NSObject, NSApplicationDelegate {
 
     @objc private func selectLanguage(_ sender: NSMenuItem) {
         guard let language = sender.representedObject as? AppLanguage else { return }
+        guard languagePreferences.language != language else { return }
         languagePreferences.language = language
         statusItem.menu = makeMenu()
         cleaner.refresh()
@@ -203,12 +204,8 @@ final class MacWipePlusApp: NSObject, NSApplicationDelegate {
 enum AppCopy {
     private static let languagePreferences = LanguagePreferenceStore()
 
-    static var language: AppLanguage {
-        languagePreferences.language
-    }
-
     static var isTraditionalChinese: Bool {
-        language == .traditionalChinese
+        languagePreferences.language == .traditionalChinese
     }
 
     static var languageMenu: String { isTraditionalChinese ? "語言" : "Language" }
