@@ -9,6 +9,7 @@ final class MacWipePlusApp: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var cleaner: CleaningModeController!
     private let preferences = PreferencesStore()
+    private let languagePreferences = LanguagePreferenceStore()
     private var globalHotKeyService: GlobalHotKeyService!
 
     static func main() {
@@ -77,6 +78,20 @@ final class MacWipePlusApp: NSObject, NSApplicationDelegate {
         let durationItem = makeMenuItem(title: AppCopy.duration, action: nil, imageName: "timer")
         durationItem.submenu = durationMenu
         menu.addItem(durationItem)
+
+        let languageMenu = NSMenu(title: AppCopy.languageMenu)
+        let selectedLanguage = languagePreferences.language
+        for language in AppLanguage.allCases {
+            let item = makeMenuItem(title: AppCopy.languageOption(language), action: #selector(selectLanguage(_:)), imageName: "globe")
+            item.target = self
+            item.representedObject = language
+            item.state = selectedLanguage == language ? .on : .off
+            languageMenu.addItem(item)
+        }
+        let languageItem = makeMenuItem(title: AppCopy.languageMenu, action: nil, imageName: "globe")
+        languageItem.submenu = languageMenu
+        menu.addItem(languageItem)
+
         let shortcut = makeMenuItem(title: AppCopy.setShortcut, action: #selector(selectShortcut), imageName: "keyboard")
         shortcut.target = self
         menu.addItem(shortcut)
@@ -102,6 +117,13 @@ final class MacWipePlusApp: NSObject, NSApplicationDelegate {
         guard let duration = sender.representedObject as? CleaningDuration else { return }
         preferences.lastDuration = duration
         statusItem.menu = makeMenu()
+    }
+
+    @objc private func selectLanguage(_ sender: NSMenuItem) {
+        guard let language = sender.representedObject as? AppLanguage else { return }
+        languagePreferences.language = language
+        statusItem.menu = makeMenu()
+        cleaner.refresh()
     }
 
     @objc private func selectCustomDuration() {
@@ -179,9 +201,22 @@ final class MacWipePlusApp: NSObject, NSApplicationDelegate {
 }
 
 enum AppCopy {
+    private static let languagePreferences = LanguagePreferenceStore()
+
+    static var language: AppLanguage {
+        languagePreferences.language
+    }
+
     static var isTraditionalChinese: Bool {
-        let language = Locale.preferredLanguages.first ?? ""
-        return language.hasPrefix("zh-Hant") || language.hasPrefix("zh-TW") || language.hasPrefix("zh-HK")
+        language == .traditionalChinese
+    }
+
+    static var languageMenu: String { isTraditionalChinese ? "語言" : "Language" }
+    static func languageOption(_ language: AppLanguage) -> String {
+        switch language {
+        case .english: return "English"
+        case .traditionalChinese: return "Traditional Chinese"
+        }
     }
 
     static var startCleaning: String { isTraditionalChinese ? "開始清潔模式" : "Start Cleaning Mode" }
@@ -449,6 +484,10 @@ final class CleaningModeController {
             ($0.contentView as? CleaningView)?.refresh()
             $0.displayIfNeeded()
         }
+    }
+
+    func refresh() {
+        refreshWindows()
     }
 
     private func installLocalInputMonitor() {
