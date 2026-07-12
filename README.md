@@ -1,5 +1,7 @@
 # MacWipePlus
 
+[![CI](https://github.com/Mapleeeeeeeeeee/MacWipePlus/actions/workflows/ci.yml/badge.svg)](https://github.com/Mapleeeeeeeeeee/MacWipePlus/actions/workflows/ci.yml)
+
 Free, local macOS cleaning mode for macOS 13+.
 
 免費、本機運作的 macOS 清潔模式，支援 macOS 13 以上。
