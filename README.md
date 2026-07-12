@@ -81,6 +81,6 @@ This is normally required only once per downloaded build.
 
 ## License / 授權
 
-License will be added before the first public GitHub release.
+Licensed under the [Apache License 2.0](LICENSE).
 
-正式公開 GitHub Release 前會補上授權條款。
+本專案採用 [Apache License 2.0](LICENSE) 授權。
