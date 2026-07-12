@@ -81,6 +81,7 @@ public struct LanguagePreferenceStore {
 ### Integration
 
 - 語言選擇透過同一個 `UserDefaults` key 流入 `AppCopy`，menu 與清潔提示使用一致語言。
+- AppKit menu 與 cleaning overlay 的同步更新由 QA journey 手動驗證；現有 regression runner 不建立 NSApplication 或視窗，因此不在 core regression test 中 mock UI。
 
 ### Mock 決策
 
