@@ -39,10 +39,45 @@ func testEmergencyExitImmediatelyResetsState() throws {
     try expect(!machine.isHolding, "emergency exit resets hold state")
 }
 
+func testLanguagePreferenceDefaultsAndPersistsSupportedValues() throws {
+    let suiteName = "MacWipePlusRegressionTests.LanguagePreference"
+    guard let defaults = UserDefaults(suiteName: suiteName) else {
+        throw RegressionFailure(description: "could not create isolated UserDefaults suite")
+    }
+
+    defaults.removePersistentDomain(forName: suiteName)
+    defer { defaults.removePersistentDomain(forName: suiteName) }
+
+    let initialStore = LanguagePreferenceStore(defaults: defaults)
+    try expectEqual(initialStore.language, .english, "missing language preference falls back to English")
+
+    initialStore.language = .traditionalChinese
+    try expectEqual(
+        LanguagePreferenceStore(defaults: defaults).language,
+        .traditionalChinese,
+        "Traditional Chinese preference persists across store creation"
+    )
+
+    initialStore.language = .english
+    try expectEqual(
+        LanguagePreferenceStore(defaults: defaults).language,
+        .english,
+        "English preference persists across store creation"
+    )
+
+    defaults.set("unsupported", forKey: LanguagePreferenceStore.key)
+    try expectEqual(
+        LanguagePreferenceStore(defaults: defaults).language,
+        .english,
+        "unknown language preference falls back to English"
+    )
+}
+
 let tests: [(String, () throws -> Void)] = [
     ("holding Esc exits after three seconds without keyUp", testHoldingEscExitsAfterThreeSecondsWithoutKeyUp),
     ("releasing Esc before three seconds cancels exit", testReleasingEscBeforeThreeSecondsCancelsExit),
-    ("emergency exit immediately resets state", testEmergencyExitImmediatelyResetsState)
+    ("emergency exit immediately resets state", testEmergencyExitImmediatelyResetsState),
+    ("language preference defaults and persists supported values", testLanguagePreferenceDefaultsAndPersistsSupportedValues)
 ]
 
 do {
