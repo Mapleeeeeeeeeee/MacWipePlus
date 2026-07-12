@@ -11,7 +11,7 @@
 	<key>NSAppleEventsUsageDescription</key><string>MacWipePlus does not record or transmit input.</string>
 	<key>NSAccessibilityUsageDescription</key><string>MacWipePlus needs Accessibility access to temporarily block input while cleaning your Mac.</string>
 	<key>NSInputMonitoringUsageDescription</key><string>MacWipePlus uses input monitoring only while cleaning mode is active, so accidental input cannot reach other apps.</string>
-	<key>CFBundleShortVersionString</key><string>0.1.0</string>
-	<key>CFBundleVersion</key><string>1</string>
+	<key>CFBundleShortVersionString</key><string>0.2.0</string>
+	<key>CFBundleVersion</key><string>2</string>
 </dict>
 </plist>
